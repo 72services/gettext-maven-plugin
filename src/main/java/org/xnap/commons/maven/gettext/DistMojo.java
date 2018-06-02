@@ -31,43 +31,48 @@ import java.nio.file.Files;
 /**
  * Generates ressource bundles.
  *
+ * @author Tammo van Lessen
  * @goal dist
  * @phase generate-resources
- * @author Tammo van Lessen
  */
 public class DistMojo
-    extends AbstractGettextMojo {
+        extends AbstractGettextMojo {
 
     /**
      * The msgcat command.
+     *
      * @parameter expression="${msgcatCmd}" default-value="msgcat"
-     * @required 
+     * @required
      */
     protected String msgcatCmd;
-    
+
     /**
      * The msgfmt command.
+     *
      * @parameter expression="${msgfmtCmd}" default-value="msgfmt"
-     * @required 
+     * @required
      */
     protected String msgfmtCmd;
-    
+
     /**
      * The package and file name of the generated class or properties files.
+     *
      * @parameter expression="${targetBundle}"
-     * @required 
+     * @required
      */
     protected String targetBundle;
-    
+
     /**
      * Output format, can be "class", "properties", or "java".
+     *
      * @parameter expression="${outputFormat}" default-value="class"
-     * @required 
+     * @required
      */
     protected String outputFormat;
-    
+
     /**
      * Java version. Can be "1" or "2".
+     *
      * @parameter expression="${javaVersion}" default-value="2"
      * @required
      */
@@ -75,36 +80,37 @@ public class DistMojo
 
     /**
      * The locale of the messages in the source code.
+     *
      * @parameter expression="${sourceLocale}" default-value="en"
      * @required
      */
     protected String sourceLocale;
 
     public void execute()
-        throws MojoExecutionException {
-    	
-    	// create output directory if it doesn't exists
-    	outputDirectory.mkdirs();
-    	
-    	CommandlineFactory cf = null;
-		if ("class".equals(outputFormat)) {
-			cf = new MsgFmtCommandlineFactory();
-		} else if ("properties".equals(outputFormat)) {
-			cf = new MsgCatCommandlineFactory();
+            throws MojoExecutionException {
+
+        // create output directory if it doesn't exists
+        outputDirectory.mkdirs();
+
+        CommandlineFactory cf = null;
+        if ("class".equals(outputFormat)) {
+            cf = new MsgFmtCommandlineFactory();
+        } else if ("properties".equals(outputFormat)) {
+            cf = new MsgCatCommandlineFactory();
         } else if ("java".equals(outputFormat)) {
             cf = new MsgFmtSourceCommandlineFactory();
         } else
-			throw new MojoExecutionException("Unknown output format: "
-					+ outputFormat + ". Should be 'class' or 'properties'.");
+            throw new MojoExecutionException("Unknown output format: "
+                    + outputFormat + ". Should be 'class' or 'properties'.");
 
-		DirectoryScanner ds = new DirectoryScanner();
-    	ds.setBasedir(poDirectory);
-    	ds.setIncludes(new String[] {"**/*.po"});
-    	ds.scan();
+        DirectoryScanner ds = new DirectoryScanner();
+        ds.setBasedir(poDirectory);
+        ds.setIncludes(new String[]{"**/*.po"});
+        ds.scan();
 
-    	String[] files = ds.getIncludedFiles();
-    	for (int i = 0; i < files.length; i++) {
-    		getLog().info("Processing " + files[i]);
+        String[] files = ds.getIncludedFiles();
+        for (int i = 0; i < files.length; i++) {
+            getLog().info("Processing " + files[i]);
             try {
                 cf.init();
             } catch (IOException e) {
@@ -113,25 +119,25 @@ public class DistMojo
             }
 
             File inputFile = new File(poDirectory, files[i]);
-    		File outputFile = cf.getOutputFile(inputFile);
+            File outputFile = cf.getOutputFile(inputFile);
 
-    		if (!isNewer(inputFile, outputFile)) {
-    			getLog().info("Not compiling, target is up-to-date: " + outputFile);
-    			continue;
-    		}
+            if (!isNewer(inputFile, outputFile)) {
+                getLog().info("Not compiling, target is up-to-date: " + outputFile);
+                continue;
+            }
 
-        	Commandline cl = cf.createCommandline(inputFile);
-			for (String arg : extraArgs) {
-				cl.createArgument().setValue(arg);
-			}
-    		getLog().debug("Executing: " + cl.toString());
-    		StreamConsumer out = new LoggerStreamConsumer(getLog(), LoggerStreamConsumer.INFO);
-    		StreamConsumer err = new LoggerStreamConsumer(getLog(), LoggerStreamConsumer.WARN);
-        	try {
-    			CommandLineUtils.executeCommandLine(cl, out, err);
-    		} catch (CommandLineException e) {
-    			getLog().error("Could not execute " + cl.getExecutable() + ".", e);
-    		}
+            Commandline cl = cf.createCommandline(inputFile);
+            for (String arg : extraArgs) {
+                cl.createArgument().setValue(arg);
+            }
+            getLog().debug("Executing: " + cl.toString());
+            StreamConsumer out = new LoggerStreamConsumer(getLog(), LoggerStreamConsumer.INFO);
+            StreamConsumer err = new LoggerStreamConsumer(getLog(), LoggerStreamConsumer.WARN);
+            try {
+                CommandLineUtils.executeCommandLine(cl, out, err);
+            } catch (CommandLineException e) {
+                getLog().error("Could not execute " + cl.getExecutable() + ".", e);
+            }
             try {
                 cf.finish();
             } catch (IOException e) {
@@ -140,37 +146,38 @@ public class DistMojo
             }
         }
 
-    	String basepath = targetBundle.replace('.', File.separatorChar);
-    	getLog().info("Creating resource bundle for source locale");
-    	touch(new File(outputDirectory, basepath + "_" + sourceLocale + ".properties"));
-    	getLog().info("Creating default resource bundle");
-    	touch(new File(outputDirectory, basepath + ".properties"));
+        String basepath = targetBundle.replace('.', File.separatorChar);
+        getLog().info("Creating resource bundle for source locale");
+        touch(new File(outputDirectory, basepath + "_" + sourceLocale + ".properties"));
+        getLog().info("Creating default resource bundle");
+        touch(new File(outputDirectory, basepath + ".properties"));
     }
 
     private boolean isNewer(File inputFile, File outputFile) {
-		return inputFile.lastModified() > outputFile.lastModified();
-	}
+        return inputFile.lastModified() > outputFile.lastModified();
+    }
 
-	private void touch(File file) {
-    	if (!file.exists()) {
-    		File parent = file.getParentFile();
-    		if (!parent.exists()) {
-    			parent.mkdirs();
-    		}
-    		try {
-				file.createNewFile();
-			} catch (IOException e) {
-				getLog().warn("Could not touch file: " + file.getName(), e);
-			}
-    	}
+    private void touch(File file) {
+        if (!file.exists()) {
+            File parent = file.getParentFile();
+            if (!parent.exists()) {
+                parent.mkdirs();
+            }
+            try {
+                file.createNewFile();
+            } catch (IOException e) {
+                getLog().warn("Could not touch file: " + file.getName(), e);
+            }
+        }
     }
 
     private interface CommandlineFactory {
-    	Commandline createCommandline(File file);
-    	/**
-    	 * @return the output file of this command
-    	 */
-    	File getOutputFile(File input);
+        Commandline createCommandline(File file);
+
+        /**
+         * @return the output file of this command
+         */
+        File getOutputFile(File input);
 
         void init() throws IOException;
 
@@ -258,32 +265,32 @@ public class DistMojo
 
     private class MsgCatCommandlineFactory implements CommandlineFactory {
 
-    	public File getOutputFile(File input) {
-    		String basepath = targetBundle.replace('.', File.separatorChar);
-    		String locale = input.getName().substring(0, input.getName().lastIndexOf('.'));
-    		locale = GettextUtils.getJavaLocale(locale);
-        	File target = new File(outputDirectory, basepath + "_" + locale + ".properties");
-        	return target;
-    	}
+        public File getOutputFile(File input) {
+            String basepath = targetBundle.replace('.', File.separatorChar);
+            String locale = input.getName().substring(0, input.getName().lastIndexOf('.'));
+            locale = GettextUtils.getJavaLocale(locale);
+            File target = new File(outputDirectory, basepath + "_" + locale + ".properties");
+            return target;
+        }
 
-    	public Commandline createCommandline(File file) {
-        	Commandline cl = new Commandline();
+        public Commandline createCommandline(File file) {
+            Commandline cl = new Commandline();
 
-        	File outputFile = getOutputFile(file);
-        	File parent = outputFile.getParentFile();
-        	if (!parent.exists()) {
-        		parent.mkdirs();
-        	}
+            File outputFile = getOutputFile(file);
+            File parent = outputFile.getParentFile();
+            if (!parent.exists()) {
+                parent.mkdirs();
+            }
 
-        	cl.setExecutable(msgcatCmd);
+            cl.setExecutable(msgcatCmd);
 
-        	cl.createArgument().setValue("--no-location");
-        	cl.createArgument().setValue("-p");
-        	cl.createArgument().setFile(file);
-        	cl.createArgument().setValue("-o");
-        	cl.createArgument().setFile(outputFile);
+            cl.createArgument().setValue("--no-location");
+            cl.createArgument().setValue("-p");
+            cl.createArgument().setFile(file);
+            cl.createArgument().setValue("-o");
+            cl.createArgument().setFile(outputFile);
 
-        	return cl;
+            return cl;
         }
 
         @Override
@@ -293,6 +300,6 @@ public class DistMojo
         @Override
         public void finish() {
         }
-     }
+    }
 
 }
