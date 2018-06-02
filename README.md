@@ -15,8 +15,6 @@ Continuation of the maven2 gettext plugin from googlecode
 
 # Release
 
-    git tag ...
-    git push origin master v...
-    mvn -Prelease deploy
-    upgate pom to next version
-    git push
+Release is automatically tagged and deployed to Maven Central via release plugin as follows:
+
+    JAVA_HOME="$(/usr/libexec/java_home -v 1.8)" mvn release:clean release:prepare release:perform
