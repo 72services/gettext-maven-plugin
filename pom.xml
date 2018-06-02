@@ -3,7 +3,7 @@
   <groupId>com.github.vlsi.gettext</groupId>
   <artifactId>gettext-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
-  <version>1.2.11-SNAPSHOT</version>
+  <version>1.2.11</version>
   <name>Maven Gettext Plugin</name>
   <url>https://github.com/vlsi/maven-gettext-plugin</url>
   <description>Generate messages templates and deploy messages bundles</description>
@@ -92,6 +92,7 @@
     <connection>scm:git:https://github.com/vlsi/maven-gettext-plugin.git</connection>
     <developerConnection>scm:git:https://github.com/vlsi/maven-gettext-plugin.git</developerConnection>
     <url>https://github.com/vlsi/maven-gettext-plugin</url>
+    <tag>v1.2.11</tag>
   </scm>
   <build>
     <pluginManagement>
