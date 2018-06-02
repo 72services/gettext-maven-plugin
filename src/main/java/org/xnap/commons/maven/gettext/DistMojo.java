@@ -145,30 +145,10 @@ public class DistMojo
                 throw new IllegalStateException("Unable to process file " + files[i], e);
             }
         }
-
-        String basepath = targetBundle.replace('.', File.separatorChar);
-        getLog().info("Creating resource bundle for source locale");
-        touch(new File(outputDirectory, basepath + "_" + sourceLocale + ".properties"));
-        getLog().info("Creating default resource bundle");
-        touch(new File(outputDirectory, basepath + ".properties"));
     }
 
     private boolean isNewer(File inputFile, File outputFile) {
         return inputFile.lastModified() > outputFile.lastModified();
-    }
-
-    private void touch(File file) {
-        if (!file.exists()) {
-            File parent = file.getParentFile();
-            if (!parent.exists()) {
-                parent.mkdirs();
-            }
-            try {
-                file.createNewFile();
-            } catch (IOException e) {
-                getLog().warn("Could not touch file: " + file.getName(), e);
-            }
-        }
     }
 
     private interface CommandlineFactory {
