@@ -64,7 +64,14 @@ public class GettextMojo
      * @required 
      */
     protected String xgettextCmd;
-    
+
+    /**
+     * Sort extracted messages, can be "output" or "by-file"
+     * @parameter expression="${sort}" default-value="by-file"
+     * @required
+     */
+    protected String sort;
+
     /**
      * An optional set of source files that should be parsed with xgettext.
      * <pre>
@@ -97,6 +104,7 @@ public class GettextMojo
     	cl.createArgument().setValue("--output=" + new File(poDirectory, keysFile).getAbsolutePath());
     	cl.createArgument().setValue("--language=Java");
     	cl.createArgument().setLine(keywords);
+        cl.createArgument().setValue("by-file".equalsIgnoreCase(sort) ? "-F" : "-s");
     	cl.setWorkingDirectory(sourceDirectory.getAbsolutePath());
     	
     	DirectoryScanner ds = new DirectoryScanner();

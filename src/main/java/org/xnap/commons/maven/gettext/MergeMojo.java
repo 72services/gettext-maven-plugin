@@ -41,7 +41,21 @@ public class MergeMojo
      * @required 
      */
     protected String msgmergeCmd;
-    
+
+    /**
+     * The msgmerge backup mode: none, numbered, existing, simple
+     * @parameter expression="${backup}" default-value="none"
+     * @required
+     */
+    protected String backup;
+
+	/**
+	 * Sort extracted messages, can be "output" or "by-file"
+	 * @parameter expression="${sort}" default-value="by-file"
+	 * @required
+	 */
+	protected String sort;
+
     public void execute()
         throws MojoExecutionException
     {
@@ -68,11 +82,12 @@ public class MergeMojo
 				cl.createArgument().setValue(arg);
 			}
         	cl.createArgument().setValue("-q");
-        	cl.createArgument().setValue("--backup=numbered");
+        	cl.createArgument().setValue("--backup=" + backup);
         	cl.createArgument().setValue("-U");
         	cl.createArgument().setFile(new File(poDirectory, files[i]));
         	cl.createArgument().setValue(new File(poDirectory, keysFile).getAbsolutePath());
-        	
+			cl.createArgument().setValue("by-file".equalsIgnoreCase(sort) ? "-F" : "-s");
+
         	getLog().debug("Executing: " + cl.toString());
     		StreamConsumer out = new LoggerStreamConsumer(getLog(), LoggerStreamConsumer.INFO);
     		StreamConsumer err = new LoggerStreamConsumer(getLog(), LoggerStreamConsumer.WARN);
