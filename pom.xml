@@ -5,7 +5,7 @@
   <packaging>maven-plugin</packaging>
   <version>1.2.11-SNAPSHOT</version>
   <name>Maven Gettext Plugin</name>
-  <url>http://gettext-commons.googlecode.com/svn/maven2-plugins-site/index.html</url>
+  <url>https://github.com/vlsi/maven-gettext-plugin</url>
   <description>Generate messages templates and deploy messages bundles</description>
   <licenses>
     <license>
@@ -89,9 +89,9 @@
     </dependency>
   </dependencies>
   <scm>
-    <connection>scm:svn:http://gettext-commons.googlecode.com/svn/maven2-plugins/trunk/</connection>
-    <developerConnection>scm:svn:https://gettext-commons.googlecode.com/svn/maven2-plugins/trunk/</developerConnection>
-    <url>http://gettext-commons.googlecode.com/svn/maven2-plugins/trunk/</url>
+    <connection>scm:git:https://github.com/vlsi/maven-gettext-plugin.git</connection>
+    <developerConnection>scm:git:https://github.com/vlsi/maven-gettext-plugin.git</developerConnection>
+    <url>https://github.com/vlsi/maven-gettext-plugin</url>
   </scm>
   <build>
     <pluginManagement>
