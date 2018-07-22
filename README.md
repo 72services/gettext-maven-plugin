@@ -3,6 +3,11 @@ Continuation of the maven2 gettext plugin from googlecode
 
 # Changelog
 
+## 1.2.12
+
+* Remove `POT-Creation-Date` by default from generated files. This simplifies VCS history
+* `nowrap` support for `gettext`
+
 ## 1.2.11
 
 * Avoid creation of empty `message.properties` and `message_en.properties`

@@ -79,6 +79,9 @@ public class AttribMojo
     		} catch (CommandLineException e) {
     			getLog().error("Could not execute " + msgattribCmd + ".", e);
     		}
+    		if (!printPOTCreationDate) {
+    			GettextUtils.removePotCreationDate(new File(poDirectory, files[i]), getLog());
+    		}
     	}
     }
 }

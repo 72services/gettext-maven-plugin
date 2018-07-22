@@ -76,8 +76,10 @@ public class MergeMojo
         }
         ds.scan();
         String[] files = ds.getIncludedFiles();
+        getLog().info("Processing files in " + poDirectory);
         for (int i = 0; i < files.length; i++) {
-            getLog().info("Processing " + files[i]);
+            String fileName = files[i];
+            getLog().info("Processing " + fileName);
             Commandline cl = new Commandline();
             cl.setExecutable(msgmergeCmd);
             for (String arg : extraArgs) {
@@ -86,7 +88,8 @@ public class MergeMojo
             cl.createArgument().setValue("-q");
             cl.createArgument().setValue("--backup=" + backup);
             cl.createArgument().setValue("-U");
-            cl.createArgument().setFile(new File(poDirectory, files[i]));
+            File file = new File(poDirectory, fileName);
+            cl.createArgument().setFile(file);
             cl.createArgument().setValue(new File(poDirectory, keysFile).getAbsolutePath());
             cl.createArgument().setValue("by-file".equalsIgnoreCase(sort) ? "-F" : "-s");
 
@@ -98,6 +101,11 @@ public class MergeMojo
             } catch (CommandLineException e) {
                 getLog().error("Could not execute " + msgmergeCmd + ".", e);
             }
+
+            if (!printPOTCreationDate) {
+                GettextUtils.removePotCreationDate(file, getLog());
+            }
         }
     }
+
 }

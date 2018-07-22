@@ -77,6 +77,14 @@ public class GettextMojo
     protected String sort;
 
     /**
+     * Do not break long message lines, longer than the output page width, into several lines
+     *
+     * @parameter expression="${nowrap}" default-value="false"
+     * @required
+     */
+    protected boolean nowrap;
+
+    /**
      * An optional set of source files that should be parsed with xgettext.
      * <pre>
      * <extraSourceFiles>
@@ -105,8 +113,12 @@ public class GettextMojo
             cl.createArgument().setValue(arg);
         }
         cl.createArgument().setValue("--from-code=" + encoding);
-        cl.createArgument().setValue("--output=" + new File(poDirectory, keysFile).getAbsolutePath());
+        File messagesPotFile = new File(poDirectory, keysFile);
+        cl.createArgument().setValue("--output=" + messagesPotFile.getAbsolutePath());
         cl.createArgument().setValue("--language=Java");
+        if (nowrap) {
+            cl.createArgument().setValue("--no-wrap");
+        }
         cl.createArgument().setLine(keywords);
         cl.createArgument().setValue("by-file".equalsIgnoreCase(sort) ? "-F" : "-s");
         cl.setWorkingDirectory(sourceDirectory.getAbsolutePath());
@@ -150,6 +162,9 @@ public class GettextMojo
             CommandLineUtils.executeCommandLine(cl, out, err);
         } catch (CommandLineException e) {
             getLog().error("Could not execute " + xgettextCmd + ".", e);
+        }
+        if (!printPOTCreationDate) {
+            GettextUtils.removePotCreationDate(messagesPotFile, getLog());
         }
     }
 

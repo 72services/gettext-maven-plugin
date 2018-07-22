@@ -15,6 +15,17 @@
  */
 package org.xnap.commons.maven.gettext;
 
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.logging.Log;
+import org.codehaus.plexus.util.IOUtil;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -76,4 +87,56 @@ public class GettextUtils {
         return sb.toString();
     }
 
+    static void removePotCreationDate(File file, Log log) throws MojoExecutionException {
+        // cannot use Strings here since file encoding is written in the file contents via
+        // Content-Type: text/plain; charset=... header
+        // That is why byte[] is used to process the file
+        log.info("Removing POT-Creation-Date from " + file.getName());
+        InputStream is = null;
+        byte[] contents;
+        try {
+            is = new FileInputStream(file);
+            contents = IOUtil.toByteArray(is);
+        } catch (IOException e) {
+            throw new MojoExecutionException("Unable to read " + file, e);
+        } finally {
+            IOUtil.close(is);
+        }
+
+        byte[] potCreationgDate;
+        try {
+            potCreationgDate = "POT-Creation-Date:".getBytes("UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new MojoExecutionException("UTF-8 is not found", e);
+        }
+
+        int headerStart = 0, headerEnd = 0;
+
+        searchHeader:
+        for (int i = 0; i < contents.length; i++) {
+            for (int j = 0; j < potCreationgDate.length; j++) {
+                if (contents[i + j] != potCreationgDate[j]) {
+                    continue searchHeader;
+                }
+            }
+
+            // header detected
+            headerStart = i;
+            for (headerEnd = headerStart + 1; headerEnd < contents.length; headerEnd++) {
+                if (contents[headerEnd] == '"') {
+                    break;
+                }
+            }
+        }
+        OutputStream os = null;
+        try {
+            os = new FileOutputStream(file);
+            os.write(contents, 0, headerStart);
+            os.write(contents, headerEnd, contents.length - headerEnd);
+        } catch (IOException e) {
+            throw new MojoExecutionException("Unable to write " + file, e);
+        } finally {
+            IOUtil.close(os);
+        }
+    }
 }

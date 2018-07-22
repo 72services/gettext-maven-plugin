@@ -70,4 +70,12 @@ public abstract class AbstractGettextMojo
      * @parameter property="excludes"
      */
     protected String[] excludes;
+
+    /**
+     * Print POT-Creation-Date header to po files
+     *
+     * @parameter expression="${printPOTCreationDate}" default-value="false"
+     * @required
+     */
+    protected boolean printPOTCreationDate;
 }
