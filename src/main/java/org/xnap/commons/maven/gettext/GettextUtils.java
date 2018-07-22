@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -40,7 +41,7 @@ public class GettextUtils {
             throw new IllegalArgumentException();
         }
         
-        List tokens = new ArrayList(3);
+        List<String> tokens = new ArrayList<>(3);
         StringTokenizer t = new StringTokenizer(locale, "_");
         while (t.hasMoreTokens()) {
             tokens.add(t.nextToken());
@@ -52,7 +53,7 @@ public class GettextUtils {
 
         if (tokens.size() < 3) {
             // check for variant
-            String lastToken = (String) tokens.get(tokens.size() - 1);
+            String lastToken = tokens.get(tokens.size() - 1);
             int index = lastToken.indexOf("@");
             if (index != -1) {
                 tokens.remove(tokens.size() - 1);
@@ -66,7 +67,7 @@ public class GettextUtils {
         }
 
         // Locale.java replaces these codes, so we have to do it too
-        String language = (String) tokens.get(0);
+        String language = tokens.get(0);
         if (language.equalsIgnoreCase("he")) {
         	tokens.set(0, "iw");
         } else if (language.equalsIgnoreCase("yi")) {
@@ -75,7 +76,7 @@ public class GettextUtils {
         	tokens.set(0, "in");
         }
 
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for (Iterator it = tokens.iterator(); it.hasNext();) {
             String token = (String) it.next();
             sb.append(token);
@@ -104,11 +105,7 @@ public class GettextUtils {
         }
 
         byte[] potCreationgDate;
-        try {
-            potCreationgDate = "POT-Creation-Date:".getBytes("UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            throw new MojoExecutionException("UTF-8 is not found", e);
-        }
+        potCreationgDate = "POT-Creation-Date:".getBytes(StandardCharsets.UTF_8);
 
         int headerStart = 0, headerEnd = 0;
 

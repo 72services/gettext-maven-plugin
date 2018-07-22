@@ -29,28 +29,28 @@ public abstract class AbstractGettextMojo
 	
 	/**
      * The output directory for generated class or properties files.
-     * @parameter expression="${outputDirectory}" default-value="${project.build.outputDirectory}"
+     * @parameter property="outputDirectory" default-value="${project.build.outputDirectory}"
      * @required
      */
     protected File outputDirectory;
 
     /**
      * Source directory. This directory is searched recursively for .java files.
-     * @parameter expression="${sourceDirectory}" default-value="${project.build.sourceDirectory}"
+     * @parameter property="sourceDirectory" default-value="${project.build.sourceDirectory}"
      * @required
      */
     protected File sourceDirectory;
     
     /**
      * The output directory for the keys.pot directory for merging .po files. 
-     * @parameter expression="${poDirectory}" default-value="${project.build.sourceDirectory}/main/po"
+     * @parameter property="poDirectory" default-value="${project.build.sourceDirectory}/main/po"
      * @required
      */
     protected File poDirectory;
     
     /**
      * Filename of the .pot file.
-     * @parameter expression="${keysFile}" default-value="keys.pot"
+     * @parameter property="keysFile" default-value="keys.pot"
      * @required
      */
     protected String keysFile;
@@ -74,7 +74,7 @@ public abstract class AbstractGettextMojo
     /**
      * Print POT-Creation-Date header to po files
      *
-     * @parameter expression="${printPOTCreationDate}" default-value="false"
+     * @parameter property="printPOTCreationDate" default-value="false"
      * @required
      */
     protected boolean printPOTCreationDate;

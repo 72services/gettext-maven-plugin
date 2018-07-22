@@ -60,7 +60,7 @@ public class ReportMojo extends AbstractMojo {
     /**
      * Specifies the directory where the report will be generated.
      *
-     * @parameter expression="${outputDirectory}" default-value="${project.reporting.outputDirectory}"
+     * @parameter property="outputDirectory" default-value="${project.reporting.outputDirectory}"
      * @required
      */
     private File outputDirectory;
@@ -75,14 +75,14 @@ public class ReportMojo extends AbstractMojo {
     /**
      * PO directory.
      *
-     * @parameter expression="${poDirectory}" default-value="${project.build.sourceDirectory}/main/po"
+     * @parameter property="poDirectory" default-value="${project.build.sourceDirectory}/main/po"
      * @required
      */
     protected File poDirectory;
 
     /**
      * @description msgfmt command.
-     * @parameter expression="${msgfmtCmd}" default-value="msgfmt"
+     * @parameter property="msgfmtCmd" default-value="msgfmt"
      * @required
      */
     protected String msgfmtCmd;
@@ -179,8 +179,8 @@ public class ReportMojo extends AbstractMojo {
             // make sure the output is in english
             cl.addEnvironment("LC_ALL", "C");
             cl.setExecutable(msgfmtCmd);
-            cl.createArgument().setValue("--statistics");
-            cl.createArgument().setValue(file.getAbsolutePath());
+            cl.createArg().setValue("--statistics");
+            cl.createArg().setValue(file.getAbsolutePath());
 
             Writer out = new StringWriter();
             Writer err = new StringWriter();
@@ -237,7 +237,7 @@ public class ReportMojo extends AbstractMojo {
 
     private class Stats {
 
-        private List items = new ArrayList();
+        private List<StatsEntry> items = new ArrayList<>();
 
         /**
          * <code>
@@ -284,7 +284,7 @@ public class ReportMojo extends AbstractMojo {
             return 0;
         }
 
-        public List getItems() {
+        public List<StatsEntry> getItems() {
             return items;
         }
 

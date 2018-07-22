@@ -38,7 +38,7 @@ public class MergeMojo
     /**
      * The msgmerge command.
      *
-     * @parameter expression="${msgmergeCmd}" default-value="msgmerge"
+     * @parameter property="msgmergeCmd" default-value="msgmerge"
      * @required
      */
     protected String msgmergeCmd;
@@ -46,7 +46,7 @@ public class MergeMojo
     /**
      * The msgmerge backup mode: none, numbered, existing, simple
      *
-     * @parameter expression="${backup}" default-value="none"
+     * @parameter property="backup" default-value="none"
      * @required
      */
     protected String backup;
@@ -54,7 +54,7 @@ public class MergeMojo
     /**
      * Sort extracted messages, can be "output" or "by-file"
      *
-     * @parameter expression="${sort}" default-value="by-file"
+     * @parameter property="sort" default-value="by-file"
      * @required
      */
     protected String sort;
@@ -83,15 +83,15 @@ public class MergeMojo
             Commandline cl = new Commandline();
             cl.setExecutable(msgmergeCmd);
             for (String arg : extraArgs) {
-                cl.createArgument().setValue(arg);
+                cl.createArg().setValue(arg);
             }
-            cl.createArgument().setValue("-q");
-            cl.createArgument().setValue("--backup=" + backup);
-            cl.createArgument().setValue("-U");
+            cl.createArg().setValue("-q");
+            cl.createArg().setValue("--backup=" + backup);
+            cl.createArg().setValue("-U");
             File file = new File(poDirectory, fileName);
-            cl.createArgument().setFile(file);
-            cl.createArgument().setValue(new File(poDirectory, keysFile).getAbsolutePath());
-            cl.createArgument().setValue("by-file".equalsIgnoreCase(sort) ? "-F" : "-s");
+            cl.createArg().setFile(file);
+            cl.createArg().setValue(new File(poDirectory, keysFile).getAbsolutePath());
+            cl.createArg().setValue("by-file".equalsIgnoreCase(sort) ? "-F" : "-s");
 
             getLog().debug("Executing: " + cl.toString());
             StreamConsumer out = new LoggerStreamConsumer(getLog(), LoggerStreamConsumer.INFO);

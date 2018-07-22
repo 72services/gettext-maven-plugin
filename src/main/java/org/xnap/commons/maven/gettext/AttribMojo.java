@@ -37,7 +37,7 @@ public class AttribMojo
 	
     /**
      * The msgattrib command.
-     * @parameter expression="${msgattribCmd}" default-value="msgattrib"
+     * @parameter property="msgattribCmd" default-value="msgattrib"
      * @required 
      */
     protected String msgattribCmd;
@@ -65,11 +65,11 @@ public class AttribMojo
     		Commandline cl = new Commandline();
     		cl.setExecutable(msgattribCmd);
 			for (String arg : extraArgs) {
-				cl.createArgument().setValue(arg);
+    			cl.createArg().setValue(arg);
 			}
-			cl.createArgument().setValue("-o");
-        	cl.createArgument().setFile(new File(poDirectory, files[i]));
-        	cl.createArgument().setFile(new File(poDirectory, files[i]));
+        	cl.createArg().setValue("-o");
+        	cl.createArg().setFile(new File(poDirectory, files[i]));
+        	cl.createArg().setFile(new File(poDirectory, files[i]));
         	
         	getLog().debug("Executing: " + cl.toString());
     		StreamConsumer out = new LoggerStreamConsumer(getLog(), LoggerStreamConsumer.INFO);

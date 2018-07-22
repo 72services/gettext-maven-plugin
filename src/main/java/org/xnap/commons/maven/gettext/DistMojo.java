@@ -41,7 +41,7 @@ public class DistMojo
     /**
      * The msgcat command.
      *
-     * @parameter expression="${msgcatCmd}" default-value="msgcat"
+     * @parameter property="msgcatCmd" default-value="msgcat"
      * @required
      */
     protected String msgcatCmd;
@@ -49,7 +49,7 @@ public class DistMojo
     /**
      * The msgfmt command.
      *
-     * @parameter expression="${msgfmtCmd}" default-value="msgfmt"
+     * @parameter property="msgfmtCmd" default-value="msgfmt"
      * @required
      */
     protected String msgfmtCmd;
@@ -57,7 +57,7 @@ public class DistMojo
     /**
      * The package and file name of the generated class or properties files.
      *
-     * @parameter expression="${targetBundle}"
+     * @parameter property="targetBundle"
      * @required
      */
     protected String targetBundle;
@@ -65,7 +65,7 @@ public class DistMojo
     /**
      * Output format, can be "class", "properties", or "java".
      *
-     * @parameter expression="${outputFormat}" default-value="class"
+     * @parameter property="outputFormat" default-value="class"
      * @required
      */
     protected String outputFormat;
@@ -73,7 +73,7 @@ public class DistMojo
     /**
      * Java version. Can be "1" or "2".
      *
-     * @parameter expression="${javaVersion}" default-value="2"
+     * @parameter property="javaVersion" default-value="2"
      * @required
      */
     protected String javaVersion;
@@ -81,7 +81,7 @@ public class DistMojo
     /**
      * The locale of the messages in the source code.
      *
-     * @parameter expression="${sourceLocale}" default-value="en"
+     * @parameter property="sourceLocale" default-value="en"
      * @required
      */
     protected String sourceLocale;
@@ -128,7 +128,7 @@ public class DistMojo
 
             Commandline cl = cf.createCommandline(inputFile);
             for (String arg : extraArgs) {
-                cl.createArgument().setValue(arg);
+                cl.createArg().setValue(arg);
             }
             getLog().debug("Executing: " + cl.toString());
             StreamConsumer out = new LoggerStreamConsumer(getLog(), LoggerStreamConsumer.INFO);
@@ -185,18 +185,18 @@ public class DistMojo
             cl.setExecutable(msgfmtCmd);
 
             if ("2".equals(javaVersion)) {
-                cl.createArgument().setValue("--java2");
+                cl.createArg().setValue("--java2");
             } else {
-                cl.createArgument().setValue("--java");
+                cl.createArg().setValue("--java");
             }
 
-            cl.createArgument().setValue("-d");
-            cl.createArgument().setFile(getOutputDirectory());
-            cl.createArgument().setValue("-r");
-            cl.createArgument().setValue(targetBundle);
-            cl.createArgument().setValue("-l");
-            cl.createArgument().setValue(getLocale(file));
-            cl.createArgument().setFile(file);
+            cl.createArg().setValue("-d");
+            cl.createArg().setFile(getOutputDirectory());
+            cl.createArg().setValue("-r");
+            cl.createArg().setValue(targetBundle);
+            cl.createArg().setValue("-l");
+            cl.createArg().setValue(getLocale(file));
+            cl.createArg().setFile(file);
             return cl;
         }
 
@@ -231,7 +231,7 @@ public class DistMojo
         @Override
         public Commandline createCommandline(File file) {
             Commandline cl = super.createCommandline(file);
-            cl.createArgument().setValue("--source");
+            cl.createArg().setValue("--source");
             return cl;
         }
 
@@ -264,11 +264,11 @@ public class DistMojo
 
             cl.setExecutable(msgcatCmd);
 
-            cl.createArgument().setValue("--no-location");
-            cl.createArgument().setValue("-p");
-            cl.createArgument().setFile(file);
-            cl.createArgument().setValue("-o");
-            cl.createArgument().setFile(outputFile);
+            cl.createArg().setValue("--no-location");
+            cl.createArg().setValue("-p");
+            cl.createArg().setFile(file);
+            cl.createArg().setValue("-o");
+            cl.createArg().setFile(outputFile);
 
             return cl;
         }

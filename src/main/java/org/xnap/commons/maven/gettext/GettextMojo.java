@@ -46,7 +46,7 @@ public class GettextMojo
     /**
      * The encoding of the source Java files. utf-8 is a superset of ascii.
      *
-     * @parameter expression="${encoding}" default-value="utf-8"
+     * @parameter property="encoding" default-value="utf-8"
      */
     protected String encoding;
 
@@ -54,7 +54,7 @@ public class GettextMojo
      * The keywords the xgettext parser will look for to extract messages. The default value works
      * with the Gettext Commons library.
      *
-     * @parameter expression="${keywords}" default-value="-ktrc:1c,2 -ktrnc:1c,2,3 -ktr -kmarktr
+     * @parameter property="keywords" default-value="-ktrc:1c,2 -ktrnc:1c,2,3 -ktr -kmarktr
      * -ktrn:1,2 -k"
      * @required
      */
@@ -63,7 +63,7 @@ public class GettextMojo
     /**
      * The xgettext command.
      *
-     * @parameter expression="${xgettextCmd}" default-value="xgettext"
+     * @parameter property="xgettextCmd" default-value="xgettext"
      * @required
      */
     protected String xgettextCmd;
@@ -71,7 +71,7 @@ public class GettextMojo
     /**
      * Sort extracted messages, can be "output" or "by-file"
      *
-     * @parameter expression="${sort}" default-value="by-file"
+     * @parameter property="sort" default-value="by-file"
      * @required
      */
     protected String sort;
@@ -79,7 +79,7 @@ public class GettextMojo
     /**
      * Do not break long message lines, longer than the output page width, into several lines
      *
-     * @parameter expression="${nowrap}" default-value="false"
+     * @parameter property="nowrap" default-value="false"
      * @required
      */
     protected boolean nowrap;
@@ -87,8 +87,9 @@ public class GettextMojo
     /**
      * An optional set of source files that should be parsed with xgettext.
      * <pre>
+     * {@code
      * <extraSourceFiles>
-     *   <directory>${basedir}</directory>
+     *   <directory>$basedir</directory>
      *   <includes>
      *      <include>** /*.jsp</include>
      *    </includes>
@@ -96,9 +97,10 @@ public class GettextMojo
      *      <exclude>** /*.txt</exclude>
      *    </excludes>
      * </extraSourceFiles>
+     * }
      * </pre>
      *
-     * @parameter expression="${extraSourceFiles}"
+     * @parameter property="extraSourceFiles"
      */
     protected FileSet extraSourceFiles;
 
@@ -110,17 +112,17 @@ public class GettextMojo
         Commandline cl = new Commandline();
         cl.setExecutable(xgettextCmd);
         for (String arg : extraArgs) {
-            cl.createArgument().setValue(arg);
+            cl.createArg().setValue(arg);
         }
-        cl.createArgument().setValue("--from-code=" + encoding);
+        cl.createArg().setValue("--from-code=" + encoding);
         File messagesPotFile = new File(poDirectory, keysFile);
-        cl.createArgument().setValue("--output=" + messagesPotFile.getAbsolutePath());
-        cl.createArgument().setValue("--language=Java");
+        cl.createArg().setValue("--output=" + messagesPotFile.getAbsolutePath());
+        cl.createArg().setValue("--language=Java");
         if (nowrap) {
-            cl.createArgument().setValue("--no-wrap");
+            cl.createArg().setValue("--no-wrap");
         }
-        cl.createArgument().setLine(keywords);
-        cl.createArgument().setValue("by-file".equalsIgnoreCase(sort) ? "-F" : "-s");
+        cl.createArg().setLine(keywords);
+        cl.createArg().setValue("by-file".equalsIgnoreCase(sort) ? "-F" : "-s");
         cl.setWorkingDirectory(sourceDirectory.getAbsolutePath());
 
         DirectoryScanner ds = new DirectoryScanner();
@@ -148,10 +150,10 @@ public class GettextMojo
 
         File file = createListFile(files, fileNameList);
         if (file != null) {
-            cl.createArgument().setValue("--files-from=" + file.getAbsolutePath());
+            cl.createArg().setValue("--files-from=" + file.getAbsolutePath());
         } else {
             for (int i = 0; i < files.length; i++) {
-                cl.createArgument().setValue(getAbsolutePath(files[i]));
+                cl.createArg().setValue(getAbsolutePath(files[i]));
             }
         }
 
