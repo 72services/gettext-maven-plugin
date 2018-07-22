@@ -17,15 +17,18 @@ package org.xnap.commons.maven.gettext;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
+import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.IOUtil;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -134,6 +137,34 @@ public class GettextUtils {
             throw new MojoExecutionException("Unable to write " + file, e);
         } finally {
             IOUtil.close(os);
+        }
+    }
+
+    public static void unescapeUnicode(File file, String encoding, Log log) throws MojoExecutionException {
+        log.info("Unescaping unicode in " + file.getName());
+        String contents;
+        try {
+            contents = FileUtils.fileRead(file, encoding);
+        } catch (IOException e) {
+            throw new MojoExecutionException("Unable to load " + file.getName(), e);
+        }
+        try (FileOutputStream os = new FileOutputStream(file);
+             Writer w = new BufferedWriter(new OutputStreamWriter(os, encoding))
+        ) {
+            int length = contents.length();
+            for (int i = 0; i < length; i++) {
+                char c = contents.charAt(i);
+                if (c == '\\'
+                        && i + 1 < length && contents.charAt(i + 1) == 'u') {
+                    String code = contents.substring(i + 2, i + 6);
+                    w.write(Integer.parseInt(code, 16));
+                    i += 5;
+                } else {
+                    w.append(c);
+                }
+            }
+        } catch (IOException e) {
+            throw new MojoExecutionException("Unable to write " + file, e);
         }
     }
 }

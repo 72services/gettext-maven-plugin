@@ -86,6 +86,21 @@ public class DistMojo
      */
     protected String sourceLocale;
 
+    /**
+     * Use unicode escape sequences when printing non-ASCII characters
+     *
+     * @parameter property="escapeUnicode" default-value="false"
+     * @required
+     */
+    protected boolean escapeUnicode;
+
+    /**
+     * The encoding of the source Java files. utf-8 is a superset of ascii.
+     *
+     * @parameter property="encoding" default-value="utf-8"
+     */
+    protected String encoding;
+
     public void execute()
             throws MojoExecutionException {
 
@@ -144,6 +159,9 @@ public class DistMojo
                 getLog().error("Unable to process file " + files[i], e);
                 throw new IllegalStateException("Unable to process file " + files[i], e);
             }
+            if (!escapeUnicode && "java".equals(outputFormat)) {
+                GettextUtils.unescapeUnicode(outputFile, encoding, getLog());
+            }
         }
     }
 
@@ -166,9 +184,13 @@ public class DistMojo
 
     private class MsgFmtCommandlineFactory implements CommandlineFactory {
 
+        protected String outputExtension() {
+            return ".class";
+        }
+
         public File getOutputFile(File input) {
             String locale = getLocale(input);
-            return new File(outputDirectory, targetBundle.replace('.', File.separatorChar) + "_" + locale + ".class");
+            return new File(outputDirectory, targetBundle.replace('.', File.separatorChar) + "_" + locale + outputExtension());
         }
 
         private String getLocale(File file) {
@@ -211,6 +233,11 @@ public class DistMojo
 
     private class MsgFmtSourceCommandlineFactory extends MsgFmtCommandlineFactory {
         private File tmpOutDir;
+
+        @Override
+        protected String outputExtension() {
+            return ".java";
+        }
 
         @Override
         public void init() throws IOException {
