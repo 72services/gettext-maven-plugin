@@ -1,22 +1,7 @@
-package org.xnap.commons.maven.gettext;
-
-/*
- * Copyright 2001-2005 The Apache Software Foundation.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+package io.seventytwo.oss.maven.gettext;
 
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.codehaus.plexus.util.DirectoryScanner;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.cli.CommandLineException;
@@ -35,133 +20,119 @@ import java.nio.file.Files;
  * @goal dist
  * @phase generate-resources
  */
-public class DistMojo
-        extends AbstractGettextMojo {
+public class DistMojo extends AbstractGettextMojo {
 
     /**
      * The msgcat command.
-     *
-     * @parameter property="msgcatCmd" default-value="msgcat"
-     * @required
      */
+    @Parameter(required = true, defaultValue = "msgcat")
     protected String msgcatCmd;
 
     /**
      * The msgfmt command.
-     *
-     * @parameter property="msgfmtCmd" default-value="msgfmt"
-     * @required
      */
+    @Parameter(required = true, defaultValue = "msgfmt")
     protected String msgfmtCmd;
 
     /**
      * The package and file name of the generated class or properties files.
-     *
-     * @parameter property="targetBundle"
-     * @required
      */
+    @Parameter(required = true)
     protected String targetBundle;
 
     /**
      * Output format, can be "class", "properties", or "java".
-     *
-     * @parameter property="outputFormat" default-value="class"
-     * @required
      */
+    @Parameter(required = true, defaultValue = "class")
     protected String outputFormat;
 
     /**
      * Java version. Can be "1" or "2".
-     *
-     * @parameter property="javaVersion" default-value="2"
-     * @required
      */
+    @Parameter(required = true, defaultValue = "2")
     protected String javaVersion;
 
     /**
      * The locale of the messages in the source code.
-     *
-     * @parameter property="sourceLocale" default-value="en"
-     * @required
      */
+    @Parameter(required = true, defaultValue = "en")
     protected String sourceLocale;
 
     /**
      * Use unicode escape sequences when printing non-ASCII characters
-     *
-     * @parameter property="escapeUnicode" default-value="false"
-     * @required
      */
+    @Parameter(required = true, defaultValue = "false")
     protected boolean escapeUnicode;
 
     /**
      * The encoding of the source Java files. utf-8 is a superset of ascii.
-     *
-     * @parameter property="encoding" default-value="utf-8"
      */
+    @Parameter(defaultValue = "utf-8")
     protected String encoding;
 
-    public void execute()
-            throws MojoExecutionException {
+    public void execute() throws MojoExecutionException {
 
-        // create output directory if it doesn't exists
-        outputDirectory.mkdirs();
-
-        CommandlineFactory cf = null;
-        if ("class".equals(outputFormat)) {
-            cf = new MsgFmtCommandlineFactory();
-        } else if ("properties".equals(outputFormat)) {
-            cf = new MsgCatCommandlineFactory();
-        } else if ("java".equals(outputFormat)) {
-            cf = new MsgFmtSourceCommandlineFactory();
-        } else
-            throw new MojoExecutionException("Unknown output format: "
-                    + outputFormat + ". Should be 'class' or 'properties'.");
-
-        DirectoryScanner ds = new DirectoryScanner();
-        ds.setBasedir(poDirectory);
-        ds.setIncludes(new String[]{"**/*.po"});
-        ds.scan();
-
-        String[] files = ds.getIncludedFiles();
-        for (int i = 0; i < files.length; i++) {
-            getLog().info("Processing " + files[i]);
-            try {
-                cf.init();
-            } catch (IOException e) {
-                getLog().error("Unable to prepare for processing " + files[i], e);
-                throw new IllegalStateException("Unable to prepare for processing " + files[i], e);
+        // create output directory if it doesn't exist
+        boolean directoryCreated = outputDirectory.mkdirs();
+        if (directoryCreated) {
+            CommandlineFactory cf;
+            if ("class".equals(outputFormat)) {
+                cf = new MsgFmtCommandlineFactory();
+            } else if ("properties".equals(outputFormat)) {
+                cf = new MsgCatCommandlineFactory();
+            } else if ("java".equals(outputFormat)) {
+                cf = new MsgFmtSourceCommandlineFactory();
+            } else {
+                throw new MojoExecutionException("Unknown output format: %s. Should be 'class' or 'properties'.".formatted(outputFormat));
             }
 
-            File inputFile = new File(poDirectory, files[i]);
-            File outputFile = cf.getOutputFile(inputFile);
+            DirectoryScanner ds = new DirectoryScanner();
+            ds.setBasedir(poDirectory);
+            ds.setIncludes(new String[]{"**/*.po"});
+            ds.scan();
 
-            if (!isNewer(inputFile, outputFile)) {
-                getLog().info("Not compiling, target is up-to-date: " + outputFile);
-                continue;
-            }
+            String[] files = ds.getIncludedFiles();
+            for (String file : files) {
+                getLog().info("Processing " + file);
+                try {
+                    cf.init();
+                } catch (IOException e) {
+                    getLog().error("Unable to prepare for processing %s".formatted(file), e);
+                    throw new IllegalStateException("Unable to prepare for processing %s".formatted(file), e);
+                }
 
-            Commandline cl = cf.createCommandline(inputFile);
-            for (String arg : extraArgs) {
-                cl.createArg().setValue(arg);
+                File inputFile = new File(poDirectory, file);
+                File outputFile = cf.getOutputFile(inputFile);
+
+                if (!isNewer(inputFile, outputFile)) {
+                    getLog().info("Not compiling, target is up-to-date: %s".formatted(outputFile));
+                    continue;
+                }
+
+                Commandline cl = cf.createCommandline(inputFile);
+                for (String arg : extraArgs) {
+                    cl.createArg().setValue(arg);
+                }
+                getLog().debug("Executing: " + cl.toString());
+                StreamConsumer out = new LoggerStreamConsumer(getLog(), LoggerStreamConsumer.INFO);
+                StreamConsumer err = new LoggerStreamConsumer(getLog(), LoggerStreamConsumer.WARN);
+                try {
+                    CommandLineUtils.executeCommandLine(cl, out, err);
+                } catch (CommandLineException e) {
+                    getLog().error("Could not execute " + cl.getExecutable() + ".", e);
+                }
+                try {
+                    cf.finish();
+                } catch (IOException e) {
+                    getLog().error("Unable to process file " + file, e);
+                    throw new IllegalStateException("Unable to process file " + file, e);
+                }
+                if (!escapeUnicode && "java".equals(outputFormat)) {
+                    GettextUtils.unescapeUnicode(outputFile, encoding, getLog());
+                }
             }
-            getLog().debug("Executing: " + cl.toString());
-            StreamConsumer out = new LoggerStreamConsumer(getLog(), LoggerStreamConsumer.INFO);
-            StreamConsumer err = new LoggerStreamConsumer(getLog(), LoggerStreamConsumer.WARN);
-            try {
-                CommandLineUtils.executeCommandLine(cl, out, err);
-            } catch (CommandLineException e) {
-                getLog().error("Could not execute " + cl.getExecutable() + ".", e);
-            }
-            try {
-                cf.finish();
-            } catch (IOException e) {
-                getLog().error("Unable to process file " + files[i], e);
-                throw new IllegalStateException("Unable to process file " + files[i], e);
-            }
-            if (!escapeUnicode && "java".equals(outputFormat)) {
-                GettextUtils.unescapeUnicode(outputFile, encoding, getLog());
-            }
+        } else {
+            getLog().error("Output directory couldn't be directoryCreated: %s".formatted(outputDirectory.getAbsolutePath()));
         }
     }
 
@@ -172,9 +143,6 @@ public class DistMojo
     private interface CommandlineFactory {
         Commandline createCommandline(File file);
 
-        /**
-         * @return the output file of this command
-         */
         File getOutputFile(File input);
 
         void init() throws IOException;
@@ -190,7 +158,7 @@ public class DistMojo
 
         public File getOutputFile(File input) {
             String locale = getLocale(input);
-            return new File(outputDirectory, targetBundle.replace('.', File.separatorChar) + "_" + locale + outputExtension());
+            return new File(outputDirectory, "%s_%s%s".formatted(targetBundle.replace('.', File.separatorChar), locale, outputExtension()));
         }
 
         private String getLocale(File file) {
@@ -276,8 +244,7 @@ public class DistMojo
             String basepath = targetBundle.replace('.', File.separatorChar);
             String locale = input.getName().substring(0, input.getName().lastIndexOf('.'));
             locale = GettextUtils.getJavaLocale(locale);
-            File target = new File(outputDirectory, basepath + "_" + locale + ".properties");
-            return target;
+            return new File(outputDirectory, "%s_%s.properties".formatted(basepath, locale));
         }
 
         public Commandline createCommandline(File file) {
@@ -285,8 +252,10 @@ public class DistMojo
 
             File outputFile = getOutputFile(file);
             File parent = outputFile.getParentFile();
-            if (!parent.exists()) {
-                parent.mkdirs();
+            if (parent.exists()) {
+                if (!parent.mkdirs()) {
+                    throw new RuntimeException("Directory could not be created: %s".formatted(parent.getAbsolutePath()));
+                }
             }
 
             cl.setExecutable(msgcatCmd);
@@ -301,7 +270,7 @@ public class DistMojo
         }
 
         @Override
-        public void init() throws IOException {
+        public void init() {
         }
 
         @Override

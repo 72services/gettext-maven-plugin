@@ -1,19 +1,4 @@
-/**
- * Copyright 2006 Felix Berger
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *   http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-package org.xnap.commons.maven.gettext;
+package io.seventytwo.oss.maven.gettext;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
@@ -35,21 +20,19 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 
-// TODO this is a copy from the gettext-ant-tasks. Ideally, both projects
-// should use a common library
 public class GettextUtils {
 
     public static String getJavaLocale(String locale) {
         if (locale == null) {
             throw new IllegalArgumentException();
         }
-        
+
         List<String> tokens = new ArrayList<>(3);
         StringTokenizer t = new StringTokenizer(locale, "_");
         while (t.hasMoreTokens()) {
             tokens.add(t.nextToken());
         }
-        
+
         if (tokens.size() < 1 || tokens.size() > 3) {
             throw new IllegalArgumentException("Invalid locale format: " + locale);
         }
@@ -72,22 +55,23 @@ public class GettextUtils {
         // Locale.java replaces these codes, so we have to do it too
         String language = tokens.get(0);
         if (language.equalsIgnoreCase("he")) {
-        	tokens.set(0, "iw");
+            tokens.set(0, "iw");
         } else if (language.equalsIgnoreCase("yi")) {
-        	tokens.set(0, "ji");
+            tokens.set(0, "ji");
         } else if (language.equalsIgnoreCase("id")) {
-        	tokens.set(0, "in");
+            tokens.set(0, "in");
         }
 
         StringBuilder sb = new StringBuilder();
-        for (Iterator it = tokens.iterator(); it.hasNext();) {
-            String token = (String) it.next();
+        Iterator<String> it = tokens.iterator();
+        while (it.hasNext()) {
+            String token = it.next();
             sb.append(token);
             if (it.hasNext()) {
                 sb.append("_");
             }
         }
-        
+
         return sb.toString();
     }
 
@@ -95,7 +79,8 @@ public class GettextUtils {
         // cannot use Strings here since file encoding is written in the file contents via
         // Content-Type: text/plain; charset=... header
         // That is why byte[] is used to process the file
-        log.info("Removing POT-Creation-Date from " + file.getName());
+        log.info("Removing POT-Creation-Date from %s".formatted(file.getName()));
+
         InputStream is = null;
         byte[] contents;
         try {
@@ -142,6 +127,7 @@ public class GettextUtils {
 
     public static void unescapeUnicode(File file, String encoding, Log log) throws MojoExecutionException {
         log.info("Unescaping unicode in " + file.getName());
+
         String contents;
         try {
             contents = FileUtils.fileRead(file, encoding);
@@ -149,8 +135,7 @@ public class GettextUtils {
             throw new MojoExecutionException("Unable to load " + file.getName(), e);
         }
         try (FileOutputStream os = new FileOutputStream(file);
-             Writer w = new BufferedWriter(new OutputStreamWriter(os, encoding))
-        ) {
+             Writer w = new BufferedWriter(new OutputStreamWriter(os, encoding))) {
             int length = contents.length();
             for (int i = 0; i < length; i++) {
                 char c = contents.charAt(i);

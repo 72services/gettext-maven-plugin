@@ -1,23 +1,8 @@
-package org.xnap.commons.maven.gettext;
-
-/*
- * Copyright 2001-2005 The Apache Software Foundation.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+package io.seventytwo.oss.maven.gettext;
 
 import org.apache.maven.model.FileSet;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.codehaus.plexus.util.DirectoryScanner;
 import org.codehaus.plexus.util.FileUtils;
 import org.codehaus.plexus.util.StringUtils;
@@ -40,48 +25,37 @@ import java.util.List;
  * @goal gettext
  * @phase generate-resources
  */
-public class GettextMojo
-        extends AbstractGettextMojo {
+public class GettextMojo extends AbstractGettextMojo {
 
     /**
      * The encoding of the source Java files. utf-8 is a superset of ascii.
-     *
-     * @parameter property="encoding" default-value="utf-8"
      */
+    @Parameter(defaultValue = "UTF-8")
     protected String encoding;
 
     /**
      * The keywords the xgettext parser will look for to extract messages. The default value works
      * with the Gettext Commons library.
-     *
-     * @parameter property="keywords" default-value="-ktrc:1c,2 -ktrnc:1c,2,3 -ktr -kmarktr
-     * -ktrn:1,2 -k"
-     * @required
      */
+    @Parameter(required = true, defaultValue = "-ktrc:1c,2 -ktrnc:1c,2,3 -ktr -kmarktr -ktrn:1,2 -k")
     protected String keywords;
 
     /**
      * The xgettext command.
-     *
-     * @parameter property="xgettextCmd" default-value="xgettext"
-     * @required
      */
+    @Parameter(required = true, defaultValue = "xgettext")
     protected String xgettextCmd;
 
     /**
      * Sort extracted messages, can be "output" or "by-file"
-     *
-     * @parameter property="sort" default-value="by-file"
-     * @required
      */
+    @Parameter(required = true, defaultValue = "by-file")
     protected String sort;
 
     /**
      * Do not break long message lines, longer than the output page width, into several lines
-     *
-     * @parameter property="nowrap" default-value="false"
-     * @required
      */
+    @Parameter(required = true, defaultValue = "false")
     protected boolean nowrap;
 
     /**
@@ -99,15 +73,12 @@ public class GettextMojo
      * </extraSourceFiles>
      * }
      * </pre>
-     *
-     * @parameter property="extraSourceFiles"
      */
+    @Parameter
     protected FileSet extraSourceFiles;
 
-    public void execute()
-            throws MojoExecutionException {
-        getLog().info("Invoking xgettext for Java files in '"
-                + sourceDirectory.getAbsolutePath() + "'.");
+    public void execute() throws MojoExecutionException {
+        getLog().info("Invoking xgettext for Java files in '%s'.".formatted(sourceDirectory.getAbsolutePath()));
 
         Commandline cl = new Commandline();
         cl.setExecutable(xgettextCmd);
@@ -137,7 +108,7 @@ public class GettextMojo
         }
         ds.scan();
         String[] files = ds.getIncludedFiles();
-        List fileNameList = Collections.emptyList();
+        List<String> fileNameList = Collections.emptyList();
         if (extraSourceFiles.getDirectory() != null) {
             try {
                 fileNameList = FileUtils.getFileNames(new File(extraSourceFiles.getDirectory()),
@@ -152,12 +123,12 @@ public class GettextMojo
         if (file != null) {
             cl.createArg().setValue("--files-from=" + file.getAbsolutePath());
         } else {
-            for (int i = 0; i < files.length; i++) {
-                cl.createArg().setValue(getAbsolutePath(files[i]));
+            for (String s : files) {
+                cl.createArg().setValue(getAbsolutePath(s));
             }
         }
 
-        getLog().debug("Executing: " + cl.toString());
+        getLog().debug("Executing: %s".formatted(cl.toString()));
         StreamConsumer out = new LoggerStreamConsumer(getLog(), LoggerStreamConsumer.INFO);
         StreamConsumer err = new LoggerStreamConsumer(getLog(), LoggerStreamConsumer.WARN);
         try {
@@ -170,23 +141,20 @@ public class GettextMojo
         }
     }
 
-    private File createListFile(String[] files, List fileList) {
+    private File createListFile(String[] files, List<String> fileList) {
         try {
             File listFile = File.createTempFile("maven", null);
             listFile.deleteOnExit();
 
-            BufferedWriter writer = new BufferedWriter(new FileWriter(listFile));
-            try {
-                for (int i = 0; i < files.length; i++) {
-                    writer.write(toUnixPath(files[i]));
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(listFile))) {
+                for (String file : files) {
+                    writer.write(toUnixPath(file));
                     writer.newLine();
                 }
-                for (Iterator i = fileList.iterator(); i.hasNext(); ) {
-                    writer.write(toUnixPath((String) i.next()));
+                for (String s : fileList) {
+                    writer.write(toUnixPath(s));
                     writer.newLine();
                 }
-            } finally {
-                writer.close();
             }
 
             return listFile;

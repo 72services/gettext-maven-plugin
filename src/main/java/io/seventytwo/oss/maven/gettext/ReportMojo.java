@@ -1,51 +1,20 @@
-package org.xnap.commons.maven.gettext;
-
-/*
- * Copyright 2005 by Steffen Pingel
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.StringTokenizer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+package io.seventytwo.oss.maven.gettext;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.reporting.AbstractMavenReport;
 import org.apache.maven.reporting.MavenReportException;
-import org.codehaus.doxia.module.xhtml.XhtmlSink;
-import org.codehaus.doxia.sink.Sink;
-import org.codehaus.doxia.site.renderer.SiteRenderer;
 import org.codehaus.plexus.util.DirectoryScanner;
 import org.codehaus.plexus.util.cli.CommandLineException;
 import org.codehaus.plexus.util.cli.CommandLineUtils;
 import org.codehaus.plexus.util.cli.Commandline;
 import org.codehaus.plexus.util.cli.WriterStreamConsumer;
+
+import java.io.*;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Goal that generates a report.
@@ -59,42 +28,29 @@ public class ReportMojo extends AbstractMojo {
 
     /**
      * Specifies the directory where the report will be generated.
-     *
-     * @parameter property="outputDirectory" default-value="${project.reporting.outputDirectory}"
-     * @required
      */
+    @Parameter(required = true, defaultValue = "${project.reporting.outputDirectory}")
     private File outputDirectory;
 
-    /**
-     * @parameter default-value="${project}"
-     * @required
-     * @readonly
-     */
+    @Parameter(required = true, readonly = true, defaultValue = "${project}")
     private MavenProject project;
 
     /**
      * PO directory.
-     *
-     * @parameter property="poDirectory" default-value="${project.build.sourceDirectory}/main/po"
-     * @required
      */
+    @Parameter(required = true, defaultValue = "${project.build.sourceDirectory}/main/po")
     protected File poDirectory;
 
     /**
-     * @description msgfmt command.
-     * @parameter property="msgfmtCmd" default-value="msgfmt"
-     * @required
+     * msgfmt command.
      */
+    @Parameter(required = true, defaultValue = "msgfmt")
     protected String msgfmtCmd;
 
-    /**
-     * @parameter property="includes"
-     */
+    @Parameter
     protected String[] includes;
 
-    /**
-     * @parameter property="excludes"
-     */
+    @Parameter
     protected String[] excludes;
 
     protected PrintStream out;
@@ -112,7 +68,7 @@ public class ReportMojo extends AbstractMojo {
         }
     }
 
-    protected void executeReport() throws MavenReportException {
+    protected void executeReport() {
         Stats stats = gatherStats();
         createReport(stats);
     }
@@ -153,8 +109,7 @@ public class ReportMojo extends AbstractMojo {
     }
 
     public Stats gatherStats() {
-        getLog().info("Gathering statistics for po files in '"
-                + poDirectory.getAbsolutePath() + "'.");
+        getLog().info("Gathering statistics for po files in '%s'.".formatted(poDirectory.getAbsolutePath()));
 
         DirectoryScanner ds = new DirectoryScanner();
         ds.setBasedir(poDirectory);
@@ -171,8 +126,8 @@ public class ReportMojo extends AbstractMojo {
         Stats stats = new Stats();
 
         String[] files = ds.getIncludedFiles();
-        for (int i = 0; i < files.length; i++) {
-            File file = new File(poDirectory, files[i]);
+        for (String s : files) {
+            File file = new File(poDirectory, s);
             getLog().info("Processing " + file.getAbsolutePath());
 
             Commandline cl = new Commandline();
@@ -196,7 +151,7 @@ public class ReportMojo extends AbstractMojo {
                     getLog().info(err.toString());
                 }
             } catch (CommandLineException e) {
-                getLog().error("Could not execute msgfmt: " + err.toString(), e);
+                getLog().error("Could not execute msgfmt: %s".formatted(err), e);
             }
         }
 
@@ -218,8 +173,7 @@ public class ReportMojo extends AbstractMojo {
                     return m.group("name").trim().replaceAll("\\\\n", "");
                 }
             }
-        } catch (IOException e) {
-            // Ignore, just return null
+        } catch (IOException ignored) {
         }
         return null;
     }
@@ -228,16 +182,15 @@ public class ReportMojo extends AbstractMojo {
         String basename = file.getName().substring(0, file.getName().lastIndexOf('.'));
         if (basename.contains("_")) {
             StringTokenizer t = new StringTokenizer(basename, "_");
-            return new Locale(t.nextToken(), t.nextToken());
+            return Locale.of(t.nextToken(), t.nextToken());
         } else {
-            return new Locale(basename);
+            return Locale.of(basename);
         }
-
     }
 
     private class Stats {
 
-        private List<StatsEntry> items = new ArrayList<>();
+        private final List<StatsEntry> items = new ArrayList<>();
 
         /**
          * <code>
@@ -277,7 +230,7 @@ public class ReportMojo extends AbstractMojo {
             if (t.hasMoreTokens()) {
                 try {
                     return Integer.parseInt(t.nextToken());
-                } catch (NumberFormatException e) {
+                } catch (NumberFormatException ignored) {
                 }
             }
             getLog().warn("Could not parse token: " + token);
@@ -290,10 +243,10 @@ public class ReportMojo extends AbstractMojo {
 
     }
 
-    private class StatsEntry implements Comparable {
+    private static class StatsEntry implements Comparable<StatsEntry> {
 
-        private File file;
-        private Locale locale;
+        private final File file;
+        private final Locale locale;
         private int untranslated;
         private int fuzzy;
         private int translated;
@@ -304,9 +257,8 @@ public class ReportMojo extends AbstractMojo {
             this.locale = ReportMojo.getLocale(file);
         }
 
-        public int compareTo(Object o) {
-            return getLocale().getDisplayName().compareTo(
-                    ((StatsEntry) o).getLocale().getDisplayName());
+        public int compareTo(StatsEntry o) {
+            return getLocale().getDisplayName().compareTo(o.getLocale().getDisplayName());
         }
 
         public Locale getLocale() {
