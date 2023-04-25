@@ -1,10 +1,8 @@
-# maven-gettext-plugin
+# Maven GNU gettext plugin
 
-Maven GNU gettext plugin
+## Changelog
 
-# Changelog
-
-## 2.0.0
+### 2.0.0
 
 * Update dependencies
 * Modernized code
