@@ -182,9 +182,9 @@ public class ReportMojo extends AbstractMojo {
         String basename = file.getName().substring(0, file.getName().lastIndexOf('.'));
         if (basename.contains("_")) {
             StringTokenizer t = new StringTokenizer(basename, "_");
-            return Locale.of(t.nextToken(), t.nextToken());
+            return new Locale(t.nextToken(), t.nextToken());
         } else {
-            return Locale.of(basename);
+            return new Locale(basename);
         }
     }
 
