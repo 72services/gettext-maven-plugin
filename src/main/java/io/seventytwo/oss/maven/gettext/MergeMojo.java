@@ -1,6 +1,8 @@
 package io.seventytwo.oss.maven.gettext;
 
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.codehaus.plexus.util.DirectoryScanner;
 import org.codehaus.plexus.util.cli.CommandLineException;
@@ -10,6 +12,7 @@ import org.codehaus.plexus.util.cli.StreamConsumer;
 
 import java.io.File;
 
+@Mojo(name = "merge", defaultPhase = LifecyclePhase.GENERATE_RESOURCES)
 public class MergeMojo extends AbstractGettextMojo {
 
     /**

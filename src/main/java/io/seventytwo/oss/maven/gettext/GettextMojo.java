@@ -2,6 +2,8 @@ package io.seventytwo.oss.maven.gettext;
 
 import org.apache.maven.model.FileSet;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.codehaus.plexus.util.DirectoryScanner;
 import org.codehaus.plexus.util.FileUtils;
@@ -21,10 +23,8 @@ import java.util.List;
 
 /**
  * Invokes xgettext to extract messages from source code and store them in the keys.pot file.
- *
- * @goal gettext
- * @phase generate-resources
  */
+@Mojo(name = "gettext", defaultPhase = LifecyclePhase.GENERATE_RESOURCES)
 public class GettextMojo extends AbstractGettextMojo {
 
     /**

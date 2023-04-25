@@ -1,6 +1,8 @@
 package io.seventytwo.oss.maven.gettext;
 
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.codehaus.plexus.util.DirectoryScanner;
 import org.codehaus.plexus.util.cli.CommandLineException;
@@ -12,11 +14,8 @@ import java.io.File;
 
 /**
  * Invokes the gettext:gettext goal and invokes msgattrib to update po files.
- *
- * @author Tammo van Lessen
- * @goal attrib
- * @phase generate-resources
  */
+@Mojo(name = "attrib", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
 public class AttribMojo extends AbstractGettextMojo {
 
     /**
