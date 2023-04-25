@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.seventytwo.oss</groupId>
-    <artifactId>maven-gettext-plugin</artifactId>
+    <artifactId>gettext-maven-plugin</artifactId>
     <packaging>maven-plugin</packaging>
 
     <version>1.5.0-SNAPSHOT</version>
