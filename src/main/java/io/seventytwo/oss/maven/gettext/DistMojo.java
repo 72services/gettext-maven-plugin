@@ -1,6 +1,8 @@
 package io.seventytwo.oss.maven.gettext;
 
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.codehaus.plexus.util.DirectoryScanner;
 import org.codehaus.plexus.util.FileUtils;
@@ -15,11 +17,8 @@ import java.nio.file.Files;
 
 /**
  * Generates ressource bundles.
- *
- * @author Tammo van Lessen
- * @goal dist
- * @phase generate-resources
  */
+@Mojo(name = "dist", defaultPhase = LifecyclePhase.GENERATE_RESOURCES)
 public class DistMojo extends AbstractGettextMojo {
 
     /**
