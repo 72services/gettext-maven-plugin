@@ -127,7 +127,7 @@
                 <version>1.18.0</version>
                 <configuration>
                     <gitFlowConfig>
-                        <productionBranch>master</productionBranch>
+                        <productionBranch>main</productionBranch>
                     </gitFlowConfig>
                 </configuration>
             </plugin>
