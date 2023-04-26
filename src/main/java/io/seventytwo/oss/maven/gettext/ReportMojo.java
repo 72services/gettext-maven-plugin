@@ -47,10 +47,10 @@ public class ReportMojo extends AbstractMojo {
     protected String msgfmtCmd;
 
     @Parameter
-    protected String[] includes;
+    protected String[] includes = new String[0];
 
     @Parameter
-    protected String[] excludes;
+    protected String[] excludes = new String[0];
 
     protected PrintStream out;
 
