@@ -75,7 +75,7 @@ public class GettextMojo extends AbstractGettextMojo {
      * </pre>
      */
     @Parameter
-    protected FileSet extraSourceFiles;
+    protected FileSet extraSourceFiles = new FileSet();
 
     public void execute() throws MojoExecutionException {
         getLog().info("Invoking xgettext for Java files in '%s'.".formatted(sourceDirectory.getAbsolutePath()));
