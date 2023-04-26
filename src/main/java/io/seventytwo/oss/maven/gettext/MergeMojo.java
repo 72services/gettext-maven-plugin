@@ -12,6 +12,9 @@ import org.codehaus.plexus.util.cli.StreamConsumer;
 
 import java.io.File;
 
+/**
+ * Executes msmerge
+ */
 @Mojo(name = "merge", defaultPhase = LifecyclePhase.GENERATE_RESOURCES)
 public class MergeMojo extends AbstractGettextMojo {
 

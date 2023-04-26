@@ -20,8 +20,17 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 
+/**
+ * Utility class
+ */
 public class GettextUtils {
 
+    /**
+     * Handels the locale string and returns the correct representation
+     *
+     * @param locale Locale string
+     * @return correct locale string
+     */
     public static String getJavaLocale(String locale) {
         if (locale == null) {
             throw new IllegalArgumentException();
@@ -75,6 +84,13 @@ public class GettextUtils {
         return sb.toString();
     }
 
+    /**
+     * Removes the creation date
+     *
+     * @param file Input file
+     * @param log  Log
+     * @throws MojoExecutionException If writing the file doesn't work
+     */
     static void removePotCreationDate(File file, Log log) throws MojoExecutionException {
         // cannot use Strings here since file encoding is written in the file contents via
         // Content-Type: text/plain; charset=... header
@@ -125,6 +141,14 @@ public class GettextUtils {
         }
     }
 
+    /**
+     * Unescape Unicode
+     *
+     * @param file     input file
+     * @param encoding encoding
+     * @param log      log
+     * @throws MojoExecutionException Problem with file handling
+     */
     public static void unescapeUnicode(File file, String encoding, Log log) throws MojoExecutionException {
         log.info("Unescaping unicode in " + file.getName());
 

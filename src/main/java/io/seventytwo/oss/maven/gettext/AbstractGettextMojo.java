@@ -5,6 +5,9 @@ import java.io.File;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugins.annotations.Parameter;
 
+/**
+ * Base class with generally used parameters
+ */
 public abstract class AbstractGettextMojo extends AbstractMojo {
 
     /**

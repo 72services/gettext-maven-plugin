@@ -31,6 +31,9 @@ public class ReportMojo extends AbstractMojo {
     @Parameter(required = true, defaultValue = "${project.reporting.outputDirectory}")
     private File outputDirectory;
 
+    /**
+     * Maven project.
+     */
     @Parameter(required = true, readonly = true, defaultValue = "${project}")
     private MavenProject project;
 
@@ -46,30 +49,42 @@ public class ReportMojo extends AbstractMojo {
     @Parameter(required = true, defaultValue = "msgfmt")
     protected String msgfmtCmd;
 
+    /**
+     * Includes.
+     */
     @Parameter
     protected String[] includes = new String[0];
 
+    /**
+     * Excludes.
+     */
     @Parameter
     protected String[] excludes = new String[0];
 
+    /**
+     * Print stream
+     */
     protected PrintStream out;
 
+    /**
+     * Executes the report
+     *
+     * @throws MojoExecutionException Something went wrong
+     */
     public void execute() throws MojoExecutionException {
         try {
             File file = new File(outputDirectory, getOutputName() + ".txt");
             file.delete();
             file.createNewFile();
             out = new PrintStream(new FileOutputStream(file, false));
-            executeReport();
+
+            Stats stats = gatherStats();
+            createReport(stats);
+
             out.close();
         } catch (Exception e) {
             throw new MojoExecutionException("An error has occurred in " + getName() + " report generation: " + e, e);
         }
-    }
-
-    protected void executeReport() {
-        Stats stats = gatherStats();
-        createReport(stats);
     }
 
     private void createReport(Stats stats) {
@@ -91,22 +106,47 @@ public class ReportMojo extends AbstractMojo {
         }
     }
 
+    /**
+     * Returns the description
+     *
+     * @return description
+     */
     public String getDescription() {
         return "Statistics about po files.";
     }
 
+    /**
+     * Returns the name
+     *
+     * @return name
+     */
     public String getName() {
         return "Gettext";
     }
 
+    /**
+     * Returns the output name
+     *
+     * @return output name
+     */
     public String getOutputName() {
         return "gettext-report";
     }
 
+    /**
+     * Returns the project
+     *
+     * @return project
+     */
     protected MavenProject getProject() {
         return project;
     }
 
+    /**
+     * Gather statistics
+     *
+     * @return stats
+     */
     public Stats gatherStats() {
         getLog().info("Gathering statistics for po files in '%s'.".formatted(poDirectory.getAbsolutePath()));
 
@@ -177,6 +217,12 @@ public class ReportMojo extends AbstractMojo {
         return null;
     }
 
+    /**
+     * Creates a locale based on the file
+     *
+     * @param file file
+     * @return the locale
+     */
     public static Locale getLocale(File file) {
         String basename = file.getName().substring(0, file.getName().lastIndexOf('.'));
         if (basename.contains("_")) {
