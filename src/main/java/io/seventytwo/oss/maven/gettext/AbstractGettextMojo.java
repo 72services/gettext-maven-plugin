@@ -35,19 +35,19 @@ public abstract class AbstractGettextMojo extends AbstractMojo {
      * Extra arguments for the cmd-line
      */
     @Parameter
-    protected String[] extraArgs;
+    protected String[] extraArgs = new String[0];
 
     /**
      * Includes
      */
     @Parameter
-    protected String[] includes;
+    protected String[] includes = new String[0];
 
     /**
      * Excludes
      */
     @Parameter
-    protected String[] excludes;
+    protected String[] excludes = new String[0];
 
     /**
      * Print POT-Creation-Date header to po files

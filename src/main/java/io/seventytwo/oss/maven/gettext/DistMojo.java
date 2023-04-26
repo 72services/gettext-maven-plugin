@@ -73,65 +73,62 @@ public class DistMojo extends AbstractGettextMojo {
 
         // create output directory if it doesn't exist
         boolean directoryCreated = outputDirectory.mkdirs();
-        if (directoryCreated) {
-            CommandlineFactory cf;
-            if ("class".equals(outputFormat)) {
-                cf = new MsgFmtCommandlineFactory();
-            } else if ("properties".equals(outputFormat)) {
-                cf = new MsgCatCommandlineFactory();
-            } else if ("java".equals(outputFormat)) {
-                cf = new MsgFmtSourceCommandlineFactory();
-            } else {
-                throw new MojoExecutionException("Unknown output format: %s. Should be 'class' or 'properties'.".formatted(outputFormat));
-            }
 
-            DirectoryScanner ds = new DirectoryScanner();
-            ds.setBasedir(poDirectory);
-            ds.setIncludes(new String[]{"**/*.po"});
-            ds.scan();
-
-            String[] files = ds.getIncludedFiles();
-            for (String file : files) {
-                getLog().info("Processing " + file);
-                try {
-                    cf.init();
-                } catch (IOException e) {
-                    getLog().error("Unable to prepare for processing %s".formatted(file), e);
-                    throw new IllegalStateException("Unable to prepare for processing %s".formatted(file), e);
-                }
-
-                File inputFile = new File(poDirectory, file);
-                File outputFile = cf.getOutputFile(inputFile);
-
-                if (!isNewer(inputFile, outputFile)) {
-                    getLog().info("Not compiling, target is up-to-date: %s".formatted(outputFile));
-                    continue;
-                }
-
-                Commandline cl = cf.createCommandline(inputFile);
-                for (String arg : extraArgs) {
-                    cl.createArg().setValue(arg);
-                }
-                getLog().debug("Executing: " + cl.toString());
-                StreamConsumer out = new LoggerStreamConsumer(getLog(), LoggerStreamConsumer.INFO);
-                StreamConsumer err = new LoggerStreamConsumer(getLog(), LoggerStreamConsumer.WARN);
-                try {
-                    CommandLineUtils.executeCommandLine(cl, out, err);
-                } catch (CommandLineException e) {
-                    getLog().error("Could not execute " + cl.getExecutable() + ".", e);
-                }
-                try {
-                    cf.finish();
-                } catch (IOException e) {
-                    getLog().error("Unable to process file " + file, e);
-                    throw new IllegalStateException("Unable to process file " + file, e);
-                }
-                if (!escapeUnicode && "java".equals(outputFormat)) {
-                    GettextUtils.unescapeUnicode(outputFile, encoding, getLog());
-                }
-            }
+        CommandlineFactory cf;
+        if ("class".equals(outputFormat)) {
+            cf = new MsgFmtCommandlineFactory();
+        } else if ("properties".equals(outputFormat)) {
+            cf = new MsgCatCommandlineFactory();
+        } else if ("java".equals(outputFormat)) {
+            cf = new MsgFmtSourceCommandlineFactory();
         } else {
-            getLog().error("Output directory couldn't be directoryCreated: %s".formatted(outputDirectory.getAbsolutePath()));
+            throw new MojoExecutionException("Unknown output format: %s. Should be 'class' or 'properties'.".formatted(outputFormat));
+        }
+
+        DirectoryScanner ds = new DirectoryScanner();
+        ds.setBasedir(poDirectory);
+        ds.setIncludes(new String[]{"**/*.po"});
+        ds.scan();
+
+        String[] files = ds.getIncludedFiles();
+        for (String file : files) {
+            getLog().info("Processing " + file);
+            try {
+                cf.init();
+            } catch (IOException e) {
+                getLog().error("Unable to prepare for processing %s".formatted(file), e);
+                throw new IllegalStateException("Unable to prepare for processing %s".formatted(file), e);
+            }
+
+            File inputFile = new File(poDirectory, file);
+            File outputFile = cf.getOutputFile(inputFile);
+
+            if (!isNewer(inputFile, outputFile)) {
+                getLog().info("Not compiling, target is up-to-date: %s".formatted(outputFile));
+                continue;
+            }
+
+            Commandline cl = cf.createCommandline(inputFile);
+            for (String arg : extraArgs) {
+                cl.createArg().setValue(arg);
+            }
+            getLog().debug("Executing: " + cl.toString());
+            StreamConsumer out = new LoggerStreamConsumer(getLog(), LoggerStreamConsumer.INFO);
+            StreamConsumer err = new LoggerStreamConsumer(getLog(), LoggerStreamConsumer.WARN);
+            try {
+                CommandLineUtils.executeCommandLine(cl, out, err);
+            } catch (CommandLineException e) {
+                getLog().error("Could not execute " + cl.getExecutable() + ".", e);
+            }
+            try {
+                cf.finish();
+            } catch (IOException e) {
+                getLog().error("Unable to process file " + file, e);
+                throw new IllegalStateException("Unable to process file " + file, e);
+            }
+            if (!escapeUnicode && "java".equals(outputFormat)) {
+                GettextUtils.unescapeUnicode(outputFile, encoding, getLog());
+            }
         }
     }
 
