@@ -70,9 +70,13 @@ public class DistMojo extends AbstractGettextMojo {
     protected String encoding;
 
     public void execute() throws MojoExecutionException {
-
-        // create output directory if it doesn't exist
-        boolean directoryCreated = outputDirectory.mkdirs();
+        if (!outputDirectory.exists()) {
+            // create output directory if it doesn't exist
+            boolean directoryCreated = outputDirectory.mkdirs();
+            if (!directoryCreated) {
+                getLog().error("Unable to create directory %s".formatted(outputDirectory.getAbsolutePath()));
+            }
+        }
 
         CommandlineFactory cf;
         if ("class".equals(outputFormat)) {

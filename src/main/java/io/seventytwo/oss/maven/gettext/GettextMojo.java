@@ -80,6 +80,14 @@ public class GettextMojo extends AbstractGettextMojo {
     public void execute() throws MojoExecutionException {
         getLog().info("Invoking xgettext for Java files in '%s'.".formatted(sourceDirectory.getAbsolutePath()));
 
+        if (!poDirectory.exists()) {
+            // create output directory if it doesn't exist
+            boolean directoryCreated = poDirectory.mkdirs();
+            if (!directoryCreated) {
+                getLog().error("Unable to create directory %s".formatted(poDirectory.getAbsolutePath()));
+            }
+        }
+
         Commandline cl = new Commandline();
         cl.setExecutable(xgettextCmd);
         for (String arg : extraArgs) {
