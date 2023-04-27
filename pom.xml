@@ -8,7 +8,7 @@
 
     <version>2.0.3-SNAPSHOT</version>
 
-    <name>Maven Gettext Plugin</name>
+    <name>Gettext Maven Plugin</name>
     <description>Maven integration for GNU gettext</description>
 
     <url>https://github.com/vlsi/maven-gettext-plugin</url>
@@ -200,8 +200,29 @@
                     </gitFlowConfig>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>3.8.2</version>
+            </plugin>
         </plugins>
     </build>
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-plugin-plugin</artifactId>
+                <version>3.8.2</version>
+                <reportSets>
+                    <reportSet>
+                        <reports>
+                            <report>report</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
+            </plugin>
+        </plugins>
+    </reporting>
 
     <scm>
         <connection>scm:git:git@github.com:72services/maven-gettext-plugin.git</connection>
