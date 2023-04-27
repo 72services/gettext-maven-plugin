@@ -86,7 +86,7 @@ public class DistMojo extends AbstractGettextMojo {
         } else if ("java".equals(outputFormat)) {
             cf = new MsgFmtSourceCommandlineFactory();
         } else {
-            throw new MojoExecutionException("Unknown output format: %s. Should be 'class' or 'properties'.".formatted(outputFormat));
+            throw new MojoExecutionException("Unknown output format: %s. Should be 'java', 'class' or 'properties'.".formatted(outputFormat));
         }
 
         DirectoryScanner ds = new DirectoryScanner();
